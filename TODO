@@ -1,0 +1,7 @@
+* Loads of cleanup
+* Add more org support
+** TODO/DONE labels for example
+* Other outliner formats
+** Vim Wiki
+* Reverse mode
+  Take in headings and write them back to a file

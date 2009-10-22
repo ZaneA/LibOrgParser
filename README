@@ -1,0 +1,12 @@
+LibOrgParser
+Written by Zane Ashby
+
+A very simple library for reading org-mode files and pulling basic information from them.
+Probably needs a lot more work to be genuinely useful but this is good enough for me at the moment.
+
+See LICENSE for license covering code files in liborgparser directory.
+
+Usage:
+Each directory contains a single makefile, tested on Windows, but should be cross platform.
+These will build the library, and the two example programs.
+The example.org file is also included for testing. As you can see it is very basic.
