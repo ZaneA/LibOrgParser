@@ -7,6 +7,8 @@
 
 #include "orgparser.h"
 
+#define MAX_DEPTH 10
+
 
 /* String trimming function from some old code I had, probably the first reuse ever */
 static char *trim(char *buffer, char *stripchars)
@@ -44,8 +46,7 @@ right:
  * (basically a poor mans strptime since that's missing in Windows) */
 static time_t parse_time(char *buffer)
 {
-	struct tm tm;
-	memset(&tm, 0, sizeof(struct tm));
+	struct tm tm = { 0 };
 
 	sscanf(buffer, "%d-%d-%d %*s %d:%d", &tm.tm_year, &tm.tm_mon, &tm.tm_mday, &tm.tm_hour, &tm.tm_min);
 
@@ -66,22 +67,17 @@ void parse_org_file(char *path, add_new_callback add_new)
 		return;
 	}
 
-	/* THIS WHOLE PART IS A MINDFUCK TO ME AND I CODED IT */
-
-	int id = 1; /* Each heading has an ID */
-	int id_list[10] = {0}; /* track 10 levels deep, any more and it will crash */
+	int id = 1;			/* Each heading has an ID */
+	int id_list[MAX_DEPTH] = { 0 };	/* track MAX_DEPTH levels deep, any more and it will crash */
 	int last_level = 0;
 	int level = 0;
-	char heading[256];
-	memset(heading, 0, 256);
-	char bodytext[256];
-	memset(bodytext, 0, 256);
-	char tags[256];
-	memset(tags, 0, 256);
+	char heading[256] = { 0 };
+	char bodytext[256] = { 0 };
+	char tags[64] = { 0 };
 	time_t deadline_t, closed_t, scheduled_t;
 
 	while (!feof(fp)) {
-		char line[256];
+		char line[256] = { 0 };
 		fgets(line, sizeof(line), fp); /* Get Line */
 
 		if (line[0] != '#') {
@@ -99,13 +95,15 @@ void parse_org_file(char *path, add_new_callback add_new)
 				for (level = 0; line[level] == '*'; level++);
 
 				/* Keep track of id's at different levels to use as parent data */
-				id_list[level] = id;
+				if (level < MAX_DEPTH) {
+					id_list[level] = id;
+				}
 
-				memset(heading, 0, 256);
+				memset(heading, 0, sizeof(heading));
 				strcpy(heading, trim(line + level + 1, " \t\n"));
 
 				/* Yank Tags out of this and store them seperately, then trim heading to remove whitespace, ugly */
-				memset(tags, 0, 256);
+				memset(tags, 0, sizeof(tags));
 				if (heading[strlen(heading)-1] == ':') {
 					/* Tags at the end of line? Let's hope so */
 					char *pointer;
@@ -117,16 +115,12 @@ void parse_org_file(char *path, add_new_callback add_new)
 					trim(heading, " \t");
 				}
 
-				memset(bodytext, 0, 256);
+				memset(bodytext, 0, sizeof(bodytext));
 
-				deadline_t = 0;
-				closed_t = 0;
-				scheduled_t = 0;
+				deadline_t = closed_t = scheduled_t = 0;
 			} else {
-				char temp[256];
-				strcpy(temp, trim(line, " \t"));
-				char timestring[128];
-				memset(timestring, 0, 128);
+				char *temp = trim(line, " \t");
+				char timestring[64] = { 0 };
 
 				if (!strncmp(temp, "DEADLINE", 8)) { /* Check others too */
 					sprintf(timestring, "%.*s", 20, temp + 11);
@@ -138,7 +132,8 @@ void parse_org_file(char *path, add_new_callback add_new)
 					sprintf(timestring, "%.*s", 20, temp + 12);
 					scheduled_t = parse_time(timestring);
 				} else {
-					strcat(bodytext, trim(line, " \t")); /* Don't copy those datetime lines into the body */
+					/* Don't copy these datetime lines into the body */
+					strcat(bodytext, temp);
 				}
 			}
 		}
