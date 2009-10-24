@@ -8,5 +8,5 @@ See LICENSE for license covering code files in liborgparser directory.
 
 Usage:
 Each directory contains a single makefile, tested on Windows, but should be cross platform.
-These will build the library, and the two example programs.
+These will build the library, and the example programs.
 The example.org file is also included for testing. As you can see it is very basic.

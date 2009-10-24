@@ -141,7 +141,7 @@ void parse_org_file(char *path, add_new_callback add_new)
 		return;
 	}
 
-	int id = 1;			/* Each heading has an ID */
+	static int id = 1;		/* Each heading has an ID */
 	int id_list[MAX_DEPTH] = { 0 };	/* track MAX_DEPTH levels deep, any more and it will crash */
 	int last_level = 0;
 	int level = 0;
