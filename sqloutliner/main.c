@@ -71,7 +71,9 @@ static int sqlite_callback(void *NotUsed, int argc, char **argv, char **azColNam
 		printf("\n");
 	} else {
 		for (i = 0; i < argc; i++) {
-			printf("%-20s %s\n", azColName[i], argv[i]);
+			if (strlen(argv[i]) > 0) {
+				printf("%-20s %s\n", azColName[i], argv[i]);
+			}
 		}
 
 		printf("\n\n");
