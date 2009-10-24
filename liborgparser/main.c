@@ -52,8 +52,76 @@ static time_t parse_time(char *buffer)
 
 	tm.tm_year -= 1900;
 	--tm.tm_mon;
+	tm.tm_isdst = -1;
 
 	return mktime(&tm);
+}
+
+
+/* Takes a string like "1d10h" and turns it into seconds */
+long parse_reltime(char *buffer)
+{
+	long amount = 0;
+	char temp[8];
+	memset(temp, 0, sizeof(temp));
+
+	int i, num, neg = 0;
+
+	for (i = 0; i < strlen(buffer); i++) {
+		switch (buffer[i]) {
+			case 's': /* second */
+				num = atoi(temp);
+				amount += num;
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case 'm': /* minute */
+				num = atoi(temp);
+				amount += 60 * num;
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case 'h': /* hour */
+				num = atoi(temp);
+				amount += 60 * 60 * num;
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case 'd': /* day */
+				num = atoi(temp);
+				amount += 60 * 60 * 24 * num;
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case 'M': /* month */
+				num = atoi(temp);
+				amount += 60 * 60 * 24 * 30 * num; /* A month is 30 days okay. */
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case 'y': /* year */
+				num = atoi(temp);
+				amount += 60 * 60 * 24 * 365 * num; /* Close enough */
+				memset(temp, 0, sizeof(temp));
+				break;
+
+			case '-': /* Make negative */
+				neg = 1;
+				break;
+
+			default: /* Should be a number */
+				if (buffer[i] > 47 && buffer[i] < 58) {
+					temp[strlen(temp)] = buffer[i];
+				}
+				break;
+		}
+	}
+
+	if (neg) {
+		return -amount;
+	} else {
+		return amount;
+	}
 }
 
 
@@ -120,17 +188,13 @@ void parse_org_file(char *path, add_new_callback add_new)
 				deadline_t = closed_t = scheduled_t = 0;
 			} else {
 				char *temp = trim(line, " \t");
-				char timestring[64] = { 0 };
 
 				if (!strncmp(temp, "DEADLINE", 8)) { /* Check others too */
-					sprintf(timestring, "%.*s", 20, temp + 11);
-					deadline_t = parse_time(timestring);
+					deadline_t = parse_time(temp + 11);
 				} else if (!strncmp(temp, "CLOSED", 6)) {
-					sprintf(timestring, "%.*s", 20, temp + 9);
-					closed_t = parse_time(timestring);
+					closed_t = parse_time(temp + 9);
 				} else if (!strncmp(temp, "SCHEDULED", 9)) {
-					sprintf(timestring, "%.*s", 20, temp + 12);
-					scheduled_t = parse_time(timestring);
+					scheduled_t = parse_time(temp + 12);
 				} else {
 					/* Don't copy these datetime lines into the body */
 					strcat(bodytext, temp);

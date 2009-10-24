@@ -13,6 +13,7 @@
 
 typedef int (*add_new_callback)(int, int, char*, char*, time_t, time_t, time_t, int, char*);
 
+long parse_reltime(char *buffer);
 void parse_org_file(char *path, add_new_callback add_new);
 
 #endif
