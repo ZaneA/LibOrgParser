@@ -93,6 +93,12 @@ long parse_reltime(char *buffer)
 				memset(temp, 0, sizeof(temp));
 				break;
 
+			case 'w': /* week */
+				num = atoi(temp);
+				amount += 60 * 60 * 24 * 7 * num;
+				memset(temp, 0, sizeof(temp));
+				break;
+
 			case 'M': /* month */
 				num = atoi(temp);
 				amount += 60 * 60 * 24 * 30 * num; /* A month is 30 days okay. */
