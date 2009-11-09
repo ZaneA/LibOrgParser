@@ -11,9 +11,39 @@
 #include <stdio.h>
 #include <time.h>
 
-typedef int (*add_new_callback)(int, int, char*, char*, time_t, time_t, time_t, int, char*);
+#define MAX_DEPTH		10
+#define MAX_LINE		256
+#define MAX_HEADING		192
+#define MAX_TAGS		64
+#define MAX_BODY		512
 
-long parse_reltime(char *buffer);
-void parse_org_file(char *path, add_new_callback add_new);
+#define OP_TYPE_UNKNOWN		0
+#define OP_TYPE_ORG		1
+#define OP_TYPE_VIMOUTLINER	2
+
+typedef struct {
+	FILE *fp;
+	int type;
+} OPFILE;
+
+typedef struct {
+	int id;
+	int parent_id;
+	int level;
+	time_t deadline;
+	time_t closed;
+	time_t scheduled;
+	char heading[MAX_HEADING];
+	char tags[MAX_TAGS];
+	char body[MAX_BODY];
+} OPTASK;
+
+typedef void (*OPCALLBACK)(OPTASK);
+
+long OP_parse_reltime(char *buffer);
+OPFILE* OP_open(char *path);
+void OP_close(OPFILE *file);
+int OP_read_task(OPFILE *file, OPCALLBACK callback);
+int OP_write_task(OPFILE *file, OPTASK task);
 
 #endif

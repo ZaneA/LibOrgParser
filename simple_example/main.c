@@ -8,21 +8,23 @@
 /* Include the header */
 #include "../liborgparser/orgparser.h"
 
-/* Here's our simple callback */
-int display(int id, int parent, char *heading, char *bodytext, time_t deadline, time_t closed, time_t scheduled, int level, char *tags)
-{
-	printf("ID:\t\t%d\n", id);
-	printf("Parent:\t\t%d\n", parent);
-	printf("Heading:\t%s\n", heading);
-	printf("Body Text:\t%s\n", bodytext);
-	printf("Deadline:\t%d\n", deadline);
-	printf("Closed:\t\t%d\n", closed);
-	printf("Scheduled:\t%d\n", scheduled);
-	printf("level:\t\t%d\n", level);
-	printf("Tags:\t\t%s\n", tags);
-	printf("\n");
-}
+OPFILE *outfile = NULL;
 
+void callback(OPTASK task)
+{
+	printf("ID:\t\t%d\n", task.id);
+	printf("Parent:\t\t%d\n", task.parent_id);
+	printf("Heading:\t%s\n", task.heading);
+	printf("Body Text:\t%s\n", task.body);
+	printf("Deadline:\t%d\n", task.deadline);
+	printf("Closed:\t\t%d\n", task.closed);
+	printf("Scheduled:\t%d\n", task.scheduled);
+	printf("level:\t\t%d\n", task.level);
+	printf("Tags:\t\t%s\n", task.tags);
+	printf("\n");
+
+	OP_write_task(outfile, task);
+}
 
 int main(int argc, char **argv)
 {
@@ -40,11 +42,18 @@ int main(int argc, char **argv)
 	 * Parse each file specified on the command line
 	 */
 
+	outfile = OP_open("test.org");
+
 	int i;
 	for (i = 1; i < argc; i++) {
-		/* Call parse_org_file passing a file name and a callback (see above) */
-		parse_org_file(argv[i], display);
+		OPFILE *file = OP_open(argv[i]);
+
+		while (OP_read_task(file, callback));
+
+		OP_close(file);
 	}
+
+	OP_close(outfile);
 
 	return 0;
 }
