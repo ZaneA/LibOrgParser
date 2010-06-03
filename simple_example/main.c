@@ -1,11 +1,11 @@
-/*
- * LibOrgParser Example app
- * Written by Zane Ashby (zane.a@demonastery.org)
- *
- * Reads org-mode files using LibOrgParser and prints parts to stdout
- */
+//
+// LibOrgParser Example app
+// Written by Zane Ashby (zane.a@demonastery.org)
+//
+// Reads org-mode files using LibOrgParser and prints parts to stdout
+//
 
-/* Include the header */
+// Include the header
 #include "../liborgparser/orgparser.h"
 
 OPFILE *outfile = NULL;
@@ -28,9 +28,9 @@ void callback(OPTASK task)
 
 int main(int argc, char **argv)
 {
-	/*
-	 * Check length of options (need at least a file)
-	 */
+	//
+	// Check length of options (need at least a file)
+	//
 
 	if (argc < 2) {
 		fprintf(stderr, "Usage: %s <file1> [file2] .. [filen]\n", argv[0]);
@@ -38,11 +38,11 @@ int main(int argc, char **argv)
 	}
 
 
-	/*
-	 * Parse each file specified on the command line
-	 */
+	//
+	// Parse each file specified on the command line
+	//
 
-	outfile = OP_open("test.org");
+	outfile = OP_open("out.org");
 
 	int i;
 	for (i = 1; i < argc; i++) {

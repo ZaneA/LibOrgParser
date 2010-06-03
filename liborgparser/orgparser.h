@@ -9,13 +9,15 @@
 #define __LIBORGPARSER_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #define MAX_DEPTH		10
-#define MAX_LINE		256
-#define MAX_HEADING		192
+#define MAX_LINE		512
+#define MAX_HEADING		256
 #define MAX_TAGS		64
-#define MAX_BODY		512
+#define MAX_BODY		1024
 
 #define OP_TYPE_UNKNOWN		0
 #define OP_TYPE_ORG		1
@@ -38,12 +40,12 @@ typedef struct {
 	char body[MAX_BODY];
 } OPTASK;
 
-typedef void (*OPCALLBACK)(OPTASK);
+typedef void (*OPCALLBACK)(OPTASK, void*);
 
 long OP_parse_reltime(char *buffer);
 OPFILE* OP_open(char *path);
 void OP_close(OPFILE *file);
-int OP_read_task(OPFILE *file, OPCALLBACK callback);
+int OP_read_task(OPFILE *file, OPCALLBACK callback, void *userData);
 int OP_write_task(OPFILE *file, OPTASK task);
 
 #endif
